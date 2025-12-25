@@ -105,6 +105,19 @@ Type 'help' for more options or 'exit' to quit.
     def _handle_collecting(self, user_input: str, extracted_symptoms: List[str]) -> Dict:
         """Handle symptom collection state"""
         
+        # Check for prediction commands first (if user has symptoms)
+        if len(self.collected_symptoms) > 0:
+            if user_input in ['no', 'n', 'done', 'predict', 'ready']:
+                self.state = ConversationState.PREDICTING
+                return {
+                    'action': 'predict',
+                    'message': "Analyzing your symptoms...",
+                    'symptoms': self.collected_symptoms
+                }
+            
+            if user_input in ['review', 'list', 'show']:
+                return self._show_collected_symptoms()
+        
         if not extracted_symptoms:
             # No symptoms detected
             if self.turn_count == 1:
